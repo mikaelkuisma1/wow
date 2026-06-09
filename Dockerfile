@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.13-slim AS base
 
 WORKDIR /work
 
@@ -9,7 +9,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install --upgrade pip
 COPY requirements.txt .
-
 RUN pip install -r requirements.txt
 
-RUN mkdir wow && cd wow && tb init
+FROM base AS wow
+
+COPY wow /work/wow
+RUN pip install /work/wow 
+
+RUN mkdir wow-repo && cd wow-repo && tb init wow

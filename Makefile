@@ -1,6 +1,9 @@
 build:
 	docker build -t wow-image .
 
+rebuild:
+	docker build --no-cache -t wow-image .
+
 run:
 	docker run -dit --name wow-container wow-image
 

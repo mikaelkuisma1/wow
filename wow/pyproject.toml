@@ -1,0 +1,38 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'wow'
+description = 'Workflow of workflows: provenance and ontology demonstration'
+dynamic = ['version']
+readme = 'README.rst'
+
+requires-python = '>=3.11'
+dependencies = ['taskblaster', 'click>=8.0.0', 'alive-progress']
+
+classifiers = [
+    'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+    'Environment :: Console',
+]
+
+[tool.setuptools]
+packages = ['wow']
+
+[tool.setuptools.dynamic]
+version = {attr = 'wow.__version__'}
+
+[tool.ruff]
+include = ['**/*.py']
+line-length = 79
+
+[tool.ruff.lint]
+select = [
+    'F', # pyflakes
+    'E', # pycodestyle error
+    'W', # pycodestyle warning
+    'I', # isort
+]
+
+[tool.ruff.format]
+quote-style = 'single'
