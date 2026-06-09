@@ -1,4 +1,3 @@
-from ase.parallel import world
 from taskblaster.repository import Repository
 from taskblaster.storage import JSONCodec
 
@@ -26,9 +25,6 @@ class WOWRepository(Repository):
 
     def worker_finish_hook(self):
         pass
-
-    def mpi_world(self):
-        return world
 
 
 def tb_init_repo(root, read_only=False):

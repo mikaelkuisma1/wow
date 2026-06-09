@@ -17,3 +17,5 @@ COPY wow /work/wow
 RUN pip install /work/wow 
 
 RUN mkdir wow-repo && cd wow-repo && tb init wow
+
+RUN cd wow-repo && tb workflow -m wow.workflow
