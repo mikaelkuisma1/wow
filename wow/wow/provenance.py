@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import json
 
+declared_rdf_classes = {}
 
 class Namespace:
     def __init__(self, iri: str, prefix: str | None = None):
@@ -80,7 +81,7 @@ class JSONLDContext:
         if len(self.graph) > 1:
             return {'@context': self.context,
                     '@graph': self.graph}
-        return {'context': self.context, **self.graph[0]}
+        return {'@context': self.context, **self.graph[0]}
 
     @property
     def asstr(self):
@@ -109,6 +110,10 @@ def rdfclass(namespace, /, *, _type=None):
         # Only add new fields after we have pruned users
         cls._fields = fields
         cls._rdftype = namespace(cls.__name__) if _type is None else _type
+        
+        assert cls._rdftype.curie not in declared_rdf_classes
+        declared_rdf_classes[cls._rdftype.curie] = cls 
+
         cls._identity = identity
 
         def __repr__(self):
@@ -142,8 +147,10 @@ def rdfclass(namespace, /, *, _type=None):
                     # We dump it first to the graph, and only reference it here by id
                     value = value.to_jsonld(ctx)
                     if '@id' in value:
-                        value = {'@id': '@id'}
-                    
+                        value = {'@id': value['@id']}
+                    else:
+                        # Omit context as we are dumping directly
+                        value = {k:v for k, v in value.items() if k is not '@context'}
                 return value
             
             for name, predicate in self._fields.items():
@@ -172,7 +179,14 @@ def rdfclass(namespace, /, *, _type=None):
 
     return wrapper
 
+def load_jsonld(dct):
+    context = dct.pop('@context', {})
+    
+    # We need to load a type for now
+    rdftype = dct['@type']
 
+    print('Loading type', rdftype)
+    asd
 if __name__ == '__main__':
     wf = Namespace('workflowofworkflows.example.com/workflow#', 'wf')
     print(wf)
@@ -210,4 +224,7 @@ if __name__ == '__main__':
 
     task = Task.create('mytask', 'run_experiment', material='BaTiO3', temperature=128)
     print(task)
-    print(json.dumps(task.to_jsonld()))
+    s = json.dumps(task.to_jsonld())
+    dct = json.loads(s)
+    print(load_jsonld(dct))
+
