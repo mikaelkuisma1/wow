@@ -36,8 +36,8 @@ class Term:
     def context(self):
         return self.namespace.context
 
-    def __call__(self, obj: Term, identity=False):
-        return PredicateObjectTuple(self, obj, identity=identity)
+    def __call__(self, identity=False):
+        return Predicate(self, identity=identity)
 
     def __repr__(self):
         return self.curie
@@ -46,6 +46,13 @@ class Term:
     def curie(self):
         # Compact URI Expression
         return self.namespace.prefix + ':' + self.name
+
+
+@dataclass
+class Predicate:
+    term: Term
+    identity: bool = False
+
 
 @dataclass(frozen=True)
 class PredicateObjectTuple:
@@ -84,7 +91,7 @@ def rdfclass(namespace, /, *, _type=None):
         for name, value in cls.__dict__.items():
             if name.startswith('__'):
                 continue
-            assert isinstance(value, PredicateObjectTuple), (name, type(value))
+            assert isinstance(value, Predicate), (name, type(value))
             if value.identity:
                 assert identity is None
                 identity = name
@@ -119,7 +126,7 @@ def rdfclass(namespace, /, *, _type=None):
                    '@type': self._rdftype.curie}
             if self._identity is not None:
                 dct.update({'@id': getattr(self, self._identity)})
-            dct.update({name: getattr(self, name) for name in self._fields})
+            dct.update({self._fields[name].term.curie: getattr(self, name) for name in self._fields})
             ctx.add(dct)
             return ctx
 
@@ -140,7 +147,7 @@ if __name__ == '__main__':
     # No type, implies the type is taken from class name
     @rdfclass(wf)
     class Workflow:
-        name = wf.hasProperty(wf.name, identity=True)
+        name = wf.name(identity=True)
 
     print(Workflow)
     workflow = Workflow(name='WorkflowOfWorkflowDemo')
