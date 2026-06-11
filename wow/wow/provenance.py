@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 
+
 class Namespace:
     def __init__(self, iri: str, prefix: str | None = None):
         self.iri = iri
         self._prefix = prefix
-    
+
     def __getattr__(self, attr: str):
         return Term(self, attr)
 
@@ -17,6 +18,7 @@ class Namespace:
     @property
     def prefix(self):
         return self._prefix + ':' or self.iri
+
 
 @dataclass(frozen=True)
 class Term:
@@ -31,7 +33,8 @@ class Term:
         return PredicateObjectTuple(self, obj)
 
     def __repr__(self):
-        return self.namespace.prefix + self.name 
+        return self.namespace.prefix + self.name
+
 
 @dataclass(frozen=True)
 class PredicateObjectTuple:
@@ -41,12 +44,10 @@ class PredicateObjectTuple:
     def __repr__(self):
         return f'pred:{self.predicate} obj:{self.obj}'
 
+
 def rdfclass(namespace, /, *, _type=None):
-    """Class decorator for dataclass like structure, but for with rdf
+    """Class decorator for dataclass like structure, but for with rdf"""
 
-
-    """
-    
     def wrapper(cls):
         print('wrapping', cls)
 
@@ -65,19 +66,25 @@ def rdfclass(namespace, /, *, _type=None):
         def __repr__(self):
             # TODO: Print fields
             return f'{self._rdftype!r}()'
+
         cls.__repr__ = __repr__
 
         # Create a custom init, only allow kwargs
         def __init__(self, **kwargs):
-            assert self._fields.keys() == kwargs.keys(), (self._fields.keys(), kwargs.keys())
+            assert self._fields.keys() == kwargs.keys(), (
+                self._fields.keys(),
+                kwargs.keys(),
+            )
             self.__dict__.update(kwargs)
+
         cls.__init__ = __init__
 
         return cls
-   
+
     return wrapper
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     wf = Namespace('workflowofworkflows.example.com/workflow#', 'wf')
     print(wf)
     print(wf.task)
@@ -91,5 +98,4 @@ if __name__ == "__main__":
 
     print(Workflow)
     print(Workflow(name='WorkflowOfWorkflowDemo'))
-    #class WorkflowDescription:
-
+    # class WorkflowDescription:
