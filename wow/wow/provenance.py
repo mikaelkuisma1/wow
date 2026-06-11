@@ -11,9 +11,12 @@ class Namespace:
     def __repr__(self):
         return f'Namespace("{self.iri}")'
 
+    def __call__(self, attr: str):
+        return getattr(self, attr)
+
     @property
     def prefix(self):
-        return self._prefix or self.iri
+        return self._prefix + ':' or self.iri
 
 @dataclass(frozen=True)
 class Term:
@@ -46,7 +49,11 @@ def rdfclass(namespace, /, *, _type=None):
     
     def wrapper(cls):
         print('wrapping', cls)
-        cls._rdftype = Namespace(cls.__name__) if _type is None else _type
+        cls._rdftype = namespace(cls.__name__) if _type is None else _type
+
+        def __repr__(self):
+            return f'{self._rdftype!r}()'
+        cls.__repr__ = __repr__
         return cls
    
     return wrapper
