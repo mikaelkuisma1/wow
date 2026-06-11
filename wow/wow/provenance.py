@@ -22,13 +22,13 @@ class Term:
 
     @property
     def iri(self):
-        return self.namespace.iri + ':' + self.name
+        return self.namespace.iri + self.name
 
     def __call__(self, obj: Term):
         return PredicateObjectTuple(self, obj)
 
     def __repr__(self):
-        return self.namespace.prefix + ':' + self.name 
+        return self.namespace.prefix + self.name 
 
 @dataclass(frozen=True)
 class PredicateObjectTuple:
@@ -38,20 +38,31 @@ class PredicateObjectTuple:
     def __repr__(self):
         return f'pred:{self.predicate} obj:{self.obj}'
 
-def rdfclass(*, type=None):
+def rdfclass(namespace, /, *, _type=None):
     """Class decorator for dataclass like structure, but for with rdf
 
 
     """
+    
     def wrapper(cls):
         print('wrapping', cls)
+        cls._rdftype = Namespace(cls.__name__) if _type is None else _type
         return cls
+   
+    return wrapper
 
 if __name__ == "__main__":
-    wow = Namespace('workflowofworkflows.example.com', 'wowdemo')
-    print(wow)
-    print(wow.task)
-    print(wow.dependsOn(wow.task))
-    #@rdfclass(type=wow._
+    wf = Namespace('workflowofworkflows.example.com/workflow#', 'wf')
+    print(wf)
+    print(wf.task)
+    print(wf.dependsOn(wf.task))
+
+    # No type, implies the type is taken from class name
+    @rdfclass(wf)
+    class Workflow:
+        name = wf.hasProperty(wf.name)
+
+    print(Workflow)
+    print(Workflow())
     #class WorkflowDescription:
 
