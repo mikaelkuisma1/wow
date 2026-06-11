@@ -17,7 +17,7 @@ class Namespace:
 
     @property
     def prefix(self):
-        return self._prefix + ':' or self.iri
+        return self._prefix or self.iri
 
     @property
     def context(self):
@@ -40,7 +40,12 @@ class Term:
         return PredicateObjectTuple(self, obj, identity=identity)
 
     def __repr__(self):
-        return self.namespace.prefix + self.name
+        return self.curie
+
+    @property
+    def curie(self):
+        # Compact URI Expression
+        return self.namespace.prefix + ':' + self.name
 
 @dataclass(frozen=True)
 class PredicateObjectTuple:
@@ -110,7 +115,8 @@ def rdfclass(namespace, /, *, _type=None):
         def to_jsonld(self, ctx: JSONLDContext | None = None):
             ctx = ctx or JSONLDContext()
             
-            dct = {'@context': self._rdftype.context}
+            dct = {'@context': self._rdftype.context,
+                   '@type': self._rdftype.curie}
             if self._identity is not None:
                 dct.update({'@id': getattr(self, self._identity)})
             dct.update({name: getattr(self, name) for name in self._fields})
