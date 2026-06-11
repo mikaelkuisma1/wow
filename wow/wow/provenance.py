@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import json
 
 
 class Namespace:
@@ -80,6 +81,10 @@ class JSONLDContext:
                     '@graph': self.graph}
         return {'context': self.context, **self.graph[0]}
 
+    @property
+    def asstr(self):
+        return json.dumps(self.dct)
+
 def rdfclass(namespace, /, *, _type=None):
     """Class decorator for dataclass like structure, but for with rdf"""
 
@@ -91,6 +96,8 @@ def rdfclass(namespace, /, *, _type=None):
         identity = None
         for name, value in cls.__dict__.items():
             if name.startswith('__'):
+                continue
+            if isinstance(value, classmethod):
                 continue
             assert isinstance(value, Predicate), (name, type(value))
             if value.identity:
@@ -168,6 +175,11 @@ if __name__ == '__main__':
         target = wf.task_target()
         arguments = wf.task_arguments(type_of_value=TaskArgument, many=True)
 
-    task = Task(name='mytask', target='run_experiment', arguments=[])
+        @classmethod
+        def create(cls, name, target, **kwargs):
+            arguments = [TaskArgument(argument=argument, value=value) for argument, value in kwargs.items()]
+            return cls(name=name, target=target, arguments=arguments)
+
+    task = Task.create('mytask', 'run_experiment', temperature=128)
     print(task)
-    print(task.to_jsonld().dct)
+    print(task.to_jsonld().asstr)
