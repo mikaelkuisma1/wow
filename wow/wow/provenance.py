@@ -19,6 +19,9 @@ class Namespace:
     def prefix(self):
         return self._prefix + ':' or self.iri
 
+    @property
+    def context(self):
+        return {self.prefix: self.iri}
 
 @dataclass(frozen=True)
 class Term:
@@ -29,12 +32,15 @@ class Term:
     def iri(self):
         return self.namespace.iri + self.name
 
+    @property
+    def context(self):
+        return self.namespace.context
+
     def __call__(self, obj: Term, identity=False):
         return PredicateObjectTuple(self, obj, identity=identity)
 
     def __repr__(self):
         return self.namespace.prefix + self.name
-
 
 @dataclass(frozen=True)
 class PredicateObjectTuple:
@@ -45,6 +51,21 @@ class PredicateObjectTuple:
     def __repr__(self):
         return f'pred:{self.predicate} obj:{self.obj} {"is @id" if self.identity else ""}'
 
+class JSONLDContext:
+    def __init__(self):
+        self.context = {} 
+        self.graph = []
+
+    def add(self, dct):
+        self.context.update(dct.pop('@context', {}))
+        self.graph.append(dct)
+
+    @property
+    def dct(self):
+        if len(self.graph) > 1:
+            return {'@context': self.context,
+                    '@graph': self.graph}
+        return {'context': self.context, **self.graph[0]}
 
 def rdfclass(namespace, /, *, _type=None):
     """Class decorator for dataclass like structure, but for with rdf"""
@@ -86,13 +107,16 @@ def rdfclass(namespace, /, *, _type=None):
 
         cls.__init__ = __init__
 
-        def to_jsonld(self):
-            dct = {}
+        def to_jsonld(self, ctx: JSONLDContext | None = None):
+            ctx = ctx or JSONLDContext()
+            
+            dct = {'@context': self._rdftype.context}
             if self._identity is not None:
                 dct.update({'@id': getattr(self, self._identity)})
             dct.update({name: getattr(self, name) for name in self._fields})
+            ctx.add(dct)
+            return ctx
 
-            return dct
         cls.to_jsonld = to_jsonld
 
         return cls
@@ -115,4 +139,4 @@ if __name__ == '__main__':
     print(Workflow)
     workflow = Workflow(name='WorkflowOfWorkflowDemo')
     print(workflow)
-    print(workflow.to_jsonld())
+    print(workflow.to_jsonld().dct)
