@@ -29,8 +29,8 @@ class Term:
     def iri(self):
         return self.namespace.iri + self.name
 
-    def __call__(self, obj: Term):
-        return PredicateObjectTuple(self, obj)
+    def __call__(self, obj: Term, identity=False):
+        return PredicateObjectTuple(self, obj, identity=identity)
 
     def __repr__(self):
         return self.namespace.prefix + self.name
@@ -40,9 +40,10 @@ class Term:
 class PredicateObjectTuple:
     predicate: Term
     obj: Term
+    identity: bool = False
 
     def __repr__(self):
-        return f'pred:{self.predicate} obj:{self.obj}'
+        return f'pred:{self.predicate} obj:{self.obj} {"is @id" if self.identity else ""}'
 
 
 def rdfclass(namespace, /, *, _type=None):
@@ -53,15 +54,20 @@ def rdfclass(namespace, /, *, _type=None):
 
         # Iterate over all fields defined in our custom rdfclass
         fields = {}
+        identity = None
         for name, value in cls.__dict__.items():
             if name.startswith('__'):
                 continue
             assert isinstance(value, PredicateObjectTuple), (name, type(value))
+            if value.identity:
+                assert identity is None
+                identity = name
             fields[name] = value
 
         # Only add new fields after we have pruned users
         cls._fields = fields
         cls._rdftype = namespace(cls.__name__) if _type is None else _type
+        cls._identity = identity
 
         def __repr__(self):
             field_strs = []
@@ -80,6 +86,15 @@ def rdfclass(namespace, /, *, _type=None):
 
         cls.__init__ = __init__
 
+        def to_jsonld(self):
+            dct = {}
+            if self._identity is not None:
+                dct.update({'@id': getattr(self, self._identity)})
+            dct.update({name: getattr(self, name) for name in self._fields})
+
+            return dct
+        cls.to_jsonld = to_jsonld
+
         return cls
 
     return wrapper
@@ -95,8 +110,9 @@ if __name__ == '__main__':
     # No type, implies the type is taken from class name
     @rdfclass(wf)
     class Workflow:
-        name = wf.hasProperty(wf.name)
+        name = wf.hasProperty(wf.name, identity=True)
 
     print(Workflow)
-    print(Workflow(name='WorkflowOfWorkflowDemo'))
-    # class WorkflowDescription:
+    workflow = Workflow(name='WorkflowOfWorkflowDemo')
+    print(workflow)
+    print(workflow.to_jsonld())
