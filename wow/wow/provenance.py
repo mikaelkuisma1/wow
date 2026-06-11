@@ -179,14 +179,37 @@ def rdfclass(namespace, /, *, _type=None):
 
     return wrapper
 
-def load_jsonld(dct):
+def load_jsonld_type(dct):
     context = dct.pop('@context', {})
     
     # We need to load a type for now
-    rdftype = dct['@type']
+    rdftypename = dct['@type']
+    assert rdftypename in declared_rdf_classes
 
-    print('Loading type', rdftype)
+    kwargs = {}
+    rdftype = declared_rdf_classes[rdftypename]
+    for name, predicate in rdftype._fields.items():
+        key = predicate.term.curie
+        # name is the python name of the field
+        # key is the curie we used to store this
+        # so here is the critical conversion of changing the keys from curies to
+        # kwargs going to "dataclass constructor"
+        kwargs[name] = load_jsonld(dct[key])
+  
+    return rdftype(**kwargs)
+
+def load_jsonld(dct):
+    if isinstance(dct, (str, int, float)):
+        return dct
+    if isinstance(dct, list):
+        return [load_jsonld(item) for item in dct]
+    assert isinstance(dct, dict)
+
+    if '@type' in dct:
+        return load_jsonld_type(dct)
+    print(dct)
     asd
+
 if __name__ == '__main__':
     wf = Namespace('workflowofworkflows.example.com/workflow#', 'wf')
     print(wf)
@@ -226,5 +249,6 @@ if __name__ == '__main__':
     print(task)
     s = json.dumps(task.to_jsonld())
     dct = json.loads(s)
-    print(load_jsonld(dct))
+    ltask = load_jsonld(dct)
+    print(type(ltask.arguments[0]))
 
