@@ -64,8 +64,9 @@ def rdfclass(namespace, /, *, _type=None):
         cls._rdftype = namespace(cls.__name__) if _type is None else _type
 
         def __repr__(self):
-            # TODO: Print fields
-            return f'{self._rdftype!r}()'
+            field_strs = []
+            dct = {name: getattr(self, name) for name in self._fields}
+            return f'{self._rdftype!r}({dct!r})'
 
         cls.__repr__ = __repr__
 
