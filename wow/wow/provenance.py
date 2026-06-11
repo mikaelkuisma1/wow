@@ -71,6 +71,7 @@ class JSONLDContext:
         self.graph = []
 
     def add(self, dct):
+        assert '@id' in dct
         self.context.update(dct.pop('@context', {}))
         self.graph.append(dct)
 
@@ -128,15 +129,42 @@ def rdfclass(namespace, /, *, _type=None):
         cls.__init__ = __init__
 
         def to_jsonld(self, ctx: JSONLDContext | None = None):
+            ctx_was_none = ctx is None
             ctx = ctx or JSONLDContext()
             
             dct = {'@context': self._rdftype.context,
                    '@type': self._rdftype.curie}
             if self._identity is not None:
                 dct.update({'@id': getattr(self, self._identity)})
-            dct.update({self._fields[name].term.curie: getattr(self, name) for name in self._fields})
-            ctx.add(dct)
-            return ctx
+            
+            def dump_and_ref(value):
+                if hasattr(value, 'to_jsonld'):
+                    # We dump it first to the graph, and only reference it here by id
+                    value = value.to_jsonld(ctx)
+                    if '@id' in value:
+                        value = {'@id': '@id'}
+                    
+                return value
+            
+            for name, predicate in self._fields.items():
+                value = getattr(self, name)
+                # If the value needs be serialized as jsonld...
+                if isinstance(value, list):
+                    assert predicate.many
+                    value = [dump_and_ref(v) for v in value]
+                else:
+                    value = dump_and_ref(value)
+
+                print('Value should be serializable now', value)
+                dct.update({predicate.term.curie: value})
+            
+            if '@id' in dct:
+                ctx.add(dct)
+
+            # Return the entire graph only at the final call
+            if ctx_was_none:
+                return ctx.dct
+            return dct
 
         cls.to_jsonld = to_jsonld
 
@@ -162,7 +190,7 @@ if __name__ == '__main__':
     workflow = Workflow(name='WorkflowOfWorkflowDemo',
                         description="Simple workflow example")
     print(workflow)
-    print(workflow.to_jsonld().dct)
+    print(workflow.to_jsonld())
 
     @rdfclass(wf)
     class TaskArgument:
@@ -180,6 +208,6 @@ if __name__ == '__main__':
             arguments = [TaskArgument(argument=argument, value=value) for argument, value in kwargs.items()]
             return cls(name=name, target=target, arguments=arguments)
 
-    task = Task.create('mytask', 'run_experiment', temperature=128)
+    task = Task.create('mytask', 'run_experiment', material='BaTiO3', temperature=128)
     print(task)
-    print(task.to_jsonld().asstr)
+    print(json.dumps(task.to_jsonld()))
