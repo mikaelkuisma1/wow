@@ -36,8 +36,8 @@ class Term:
     def context(self):
         return self.namespace.context
 
-    def __call__(self, identity=False):
-        return Predicate(self, identity=identity)
+    def __call__(self, type_of_value=None, identity=False, many=False):
+        return Predicate(self, identity=identity, type_of_value=type_of_value, many=many)
 
     def __repr__(self):
         return self.curie
@@ -52,7 +52,8 @@ class Term:
 class Predicate:
     term: Term
     identity: bool = False
-
+    type_of_value: Type | None = None
+    many: bool = False
 
 @dataclass(frozen=True)
 class PredicateObjectTuple:
@@ -148,8 +149,25 @@ if __name__ == '__main__':
     @rdfclass(wf)
     class Workflow:
         name = wf.name(identity=True)
+        description = wf.description()
 
     print(Workflow)
-    workflow = Workflow(name='WorkflowOfWorkflowDemo')
+    workflow = Workflow(name='WorkflowOfWorkflowDemo',
+                        description="Simple workflow example")
     print(workflow)
     print(workflow.to_jsonld().dct)
+
+    @rdfclass(wf)
+    class TaskArgument:
+        argument = wf.argument_name()
+        value = wf.argument_value()
+
+    @rdfclass(wf)
+    class Task:
+        name = wf.name(identity=True)
+        target = wf.task_target()
+        arguments = wf.task_arguments(type_of_value=TaskArgument, many=True)
+
+    task = Task(name='mytask', target='run_experiment', arguments=[])
+    print(task)
+    print(task.to_jsonld().dct)
