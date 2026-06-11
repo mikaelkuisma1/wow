@@ -49,11 +49,30 @@ def rdfclass(namespace, /, *, _type=None):
     
     def wrapper(cls):
         print('wrapping', cls)
+
+        # Iterate over all fields defined in our custom rdfclass
+        fields = {}
+        for name, value in cls.__dict__.items():
+            if name.startswith('__'):
+                continue
+            assert isinstance(value, PredicateObjectTuple), (name, type(value))
+            fields[name] = value
+
+        # Only add new fields after we have pruned users
+        cls._fields = fields
         cls._rdftype = namespace(cls.__name__) if _type is None else _type
 
         def __repr__(self):
+            # TODO: Print fields
             return f'{self._rdftype!r}()'
         cls.__repr__ = __repr__
+
+        # Create a custom init, only allow kwargs
+        def __init__(self, **kwargs):
+            assert self._fields.keys() == kwargs.keys(), (self._fields.keys(), kwargs.keys())
+            self.__dict__.update(kwargs)
+        cls.__init__ = __init__
+
         return cls
    
     return wrapper
@@ -63,6 +82,7 @@ if __name__ == "__main__":
     print(wf)
     print(wf.task)
     print(wf.dependsOn(wf.task))
+    print(type(wf.dependsOn(wf.task)))
 
     # No type, implies the type is taken from class name
     @rdfclass(wf)
@@ -70,6 +90,6 @@ if __name__ == "__main__":
         name = wf.hasProperty(wf.name)
 
     print(Workflow)
-    print(Workflow())
+    print(Workflow(name='WorkflowOfWorkflowDemo'))
     #class WorkflowDescription:
 
