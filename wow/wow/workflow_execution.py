@@ -1,9 +1,9 @@
-import json
 from wow.provenance import load_jsonld, rdfclass, time
 from pathlib import Path
 from importlib import import_module
 from datetime import datetime, UTC
 import uuid
+import json
 
 from wow.workflow_definition import wf, Task, Namespace
 
@@ -30,7 +30,6 @@ class WorkerExecution:
 
 def tasks_to_outputs(value, outputs):
     # Replace tasks with their outputs
-    print(value, '\n!!!rdftype:', value._rdftype)
     if isinstance(value, Task):
         return outputs[value.identity]
 

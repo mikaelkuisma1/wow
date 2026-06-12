@@ -16,6 +16,12 @@ class SimulationOutput:
     predicted_voltage_V = wow.predicted_voltage_V()
     uncertainty_V = wow.uncertainty_V()
 
+@rdfclass(wow)
+class ExperimentOutput:
+    status = wow.experimentStatus()
+    measured_voltage_V = wow.measuredVoltage()
+    uncertainty_V = wow.uncertainty_V()
+
 
 def simulation_node(inputs: SimulationInputs) -> SimulationOutput:
     composition = inputs.composition
@@ -28,23 +34,26 @@ def simulation_node(inputs: SimulationInputs) -> SimulationOutput:
 
 def experiment_node(sim_result):
     if sim_result.predicted_voltage_V < 3.0:
-        return {"status": "skipped", "reason": "prediction below threshold"}
+        return ExperimentOutput(status="skipped", reason="prediction below threshold")
+
     # Mock latency and measurement noise for a remote SDL
+    import time
     time.sleep(0.2)
-    measured = sim_result["predicted_voltage_V"] + random.uniform(-0.12, 0.12)
-    return {"status": "completed", "measured_voltage_V": round(measured, 3), "uncertainty_V": 0.05}
+    measured = sim_result.predicted_voltage_V + random.uniform(-0.12, 0.12)
+    return ExperimentOutput(status="completed", measured_voltage_V= round(measured, 3), uncertainty_V= 0.05)
 
 
 def decision_node(sim_result, exp_result):
-    if exp_result.get("status") != "completed":
+    if exp_result.status != "completed":
         return {"recommendation": "explore", "rationale": "experiment unavailable or skipped"}
-    delta = abs(sim_result["predicted_voltage_V"] - exp_result["measured_voltage_V"])
-    if delta < 0.12:
+    delta = abs(sim_result.predicted_voltage_V - exp_result.measured_voltage_V)
+    print("XXX", delta)
+    if delta < 0.02:
         return {"recommendation": "exploit", "rationale": "simulation and experiment agree within tolerance"}
     return {"recommendation": "explore", "rationale": "model/experiment discrepancy suggests uncertainty"}
 
 def write_workflow_json(filename: str):
-    simulation_inputs = SimulationInputs(composition='asd', temperature_K=200)
+    simulation_inputs = SimulationInputs(composition='LiFePO4', temperature_K=300)
     task1 = Task.create('mytask1', simulation_node, inputs=simulation_inputs)
     task2 = Task.create('mytask2', experiment_node, sim_result=task1)
     task3 = Task.create('mytask3', decision_node, sim_result=task1, exp_result=task2)
