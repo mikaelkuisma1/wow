@@ -238,12 +238,10 @@ def load_jsonld(dct, ctx=None):
     if '@graph' in dct:
         graph = dct['@graph']
         types = [load_jsonld_type(item, ctx) for item in graph]
-        print('Our dct has graph and looks like', dct)
         return ctx.by_id(dct['@id'])
 
     if '@id' in dct:
         # Pure reference
-        print('Pure reference', dct)
         return ctx.by_id(dct['@id'])
 
     print(dct)
@@ -273,10 +271,12 @@ if __name__ == '__main__':
             arguments = [TaskArgument(argument=argument, value=value) for argument, value in kwargs.items()]
             return cls(name=name, target=target, arguments=arguments)
 
-    task = Task.create('mytask', 'run_experiment', material='BaTiO3', temperature=128)
+    task1 = Task.create('mytask1', 'run_experiment', material='BaTiO3', temperature=128)
+    task2 = Task.create('mytask2', 'run_simulation', material='BaTiO3', temperature=128)
+    task3 = Task.create('mytask3', 'decision_node', experiment=task1, simulation=task2)
 
-    print(task)
-    s = json.dumps(task.to_jsonld())
+    print(task3)
+    s = json.dumps(task3.to_jsonld())
     dct = json.loads(s)
     assert '@id' in dct
     ltask = load_jsonld(dct)
@@ -291,14 +291,16 @@ if __name__ == '__main__':
     print(Workflow)
     workflow = Workflow(name='WorkflowOfWorkflowDemo',
                         description="Simple workflow example",
-                        tasks=[task])
+                        tasks=[task1, task2, task3])
     print(workflow)
     print(workflow.to_jsonld())
 
-    s = json.dumps(workflow.to_jsonld())
+    s = json.dumps(workflow.to_jsonld(), indent=4)
+    from pathlib import Path
+    Path('workflow.json').write_text(s)
     dct = json.loads(s)
     print('Deserializing', dct)
     lworkflow = load_jsonld(dct)
     print(lworkflow)
-    s2 = json.dumps(lworkflow.to_jsonld())
+    s2 = json.dumps(lworkflow.to_jsonld(), indent=4)
     assert s == s2  # Reserialization of loaded should be the same
