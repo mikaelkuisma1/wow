@@ -1,9 +1,8 @@
 import json
-from wow.provenance import load_jsonld
-from wow.provenance import rdfclass
+from wow.provenance import load_jsonld, rdfclass, time
 from pathlib import Path
 from importlib import import_module
-import time
+from datetime import datetime, UTC
 import uuid
 
 from wow.workflow_definition import wf, Task, Namespace
@@ -39,21 +38,22 @@ def tasks_to_outputs(value, outputs):
     return value
 
 class Runner:
+    @property
+    def time():
+        t = time.time()
+        timestamp = datetime.fromtimestamp(t, UTC).isoformat()
+
     def run(self, workflow):
         worker_id = str(uuid.uuid4())
         # Temporarily store outputs of tasks here
         outputs = {}
         executions = []
         for task in workflow.topological_order:
-            start_time = time.time()
-            print(task.identity)
-            print(dir(task))
-            print(task.target)
-            print(task.arguments)
+            start_time = time()
             func = import_target(task.target)
             kwargs = {argument.argument: tasks_to_outputs(argument.value, outputs) for argument in task.arguments}
             output = func(**kwargs)
-            end_time = time.time()
+            end_time = time()
             # Store outputs
             outputs[task.identity] = output
 

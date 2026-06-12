@@ -268,3 +268,19 @@ def load_jsonld(dct, ctx=None):
     print(type(dct))
     asd
 
+xsd = Namespace("http://www.w3.org/2001/XMLSchema#", 'xsd')
+
+@dataclass
+class dateTime:
+    time: float
+
+    def to_jsonld(self, ctx):
+        ctx.context[xsd.prefix] = xsd.iri
+        from datetime import datetime, UTC
+        timestamp = datetime.fromtimestamp(self.time, UTC).isoformat()
+        return {"@value": timestamp,
+                "@type": "xsd:dateTime"}
+
+def time():
+    import time
+    return dateTime(time.time())
