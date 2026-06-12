@@ -22,6 +22,7 @@ class TaskExecution:
     end_time = prov.endedAtTime()
     inputs = prov.used(many=True)
     state = wf.hasTaskState()
+    error = wf.errorMessage()
 
 @rdfclass(wf, subclassof=[prov.Activity])
 class WorkerExecution:
@@ -49,19 +50,46 @@ class Runner:
         executions = []
         for task in workflow.topological_order:
             start_time = time()
+            if any(execution.state != 'done' for execution in executions):
+                end_time = time()
+                te = TaskExecution(
+                    task=task,
+                    output=None,
+                    start_time=start_time,
+                    end_time=end_time,
+                    inputs=task.arguments,
+                    state='cancelled',
+                    error='previous task did not complete successfully',
+                )
+                executions.append(te)
+                continue
+
             func = import_target(task.target)
-            kwargs = {argument.argument: tasks_to_outputs(argument.value, outputs) for argument in task.arguments}
-            output = func(**kwargs)
+            kwargs = {
+                argument.argument: tasks_to_outputs(argument.value, outputs)
+                for argument in task.arguments
+            }
+
+            try:
+                output = func(**kwargs)
+            except Exception as err:
+                output = None
+                state = 'failed'
+                error = f'{err.__class__.__name__}: {err}'
+            else:
+                # Store outputs only for successfully completed tasks.
+                outputs[task.identity] = output
+                state = 'done'
+                error = None
             end_time = time()
-            # Store outputs
-            outputs[task.identity] = output
 
             te = TaskExecution(task=task,
                                output=output,
                                start_time=start_time,
                                end_time=end_time,
                                inputs=task.arguments,
-                               state='done') # TODO: ENUM
+                               state=state,
+                               error=error) # TODO: ENUM
             executions.append(te)
         return WorkerExecution(worker_id=worker_id, task_executions=executions)
 
@@ -72,4 +100,3 @@ def execute_workflow(jsonfile: str, resultfile: str):
     runner = Runner()
     worker_execution = runner.run(workflow)
     Path(resultfile).write_text(json.dumps(worker_execution.to_jsonld(), indent=4))
-

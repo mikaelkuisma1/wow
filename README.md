@@ -37,6 +37,12 @@ Units are represented explicitly via qudt namespace.
                         },
 ```
 
+## Failure handling (deliverable)
+
+The executor catches exceptions raised by individual task functions and records
+the task execution state (either `done`, `failed`, or `cancelled` (if depending on `failed` task).
+This way the metadata can always be returned, even some tasks will fail.
+
 ## Thought process
 
 Looking at the initial scaffolding, I find it too error prone to work directly with dictionaries (and also I was not that familiar with JSON-LD format). So I made a decision, that in the long run it will be better, if I learn JSON-LD from bottom up with its associated ontologies. Also, working with purely dictionaries is tedious, so I wanted to make the serialization and deserialization to work fully via JSON-LD utilizing modern python standard. This also allowed me to learn what JSON-LD is about as I had to implement many small details and think about the datastructures.
@@ -49,7 +55,6 @@ To meet another deliverable, workflow execution, I created `wow/workflow_executi
 
 TODO: Software information
 TODO: Interoperability discussion
-TODO: Failure handling
 
 ## LLM Use
 
