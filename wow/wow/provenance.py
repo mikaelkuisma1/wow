@@ -151,6 +151,10 @@ def rdfclass(namespace, /, *, _type=None, subclassof=None):
 
         def to_jsonld(self, ctx: JSONLDContext | None = None):
             ctx_was_none = ctx is None
+            if ctx_was_none:
+                if self._identity is None:
+                    raise RuntimeError('Root object must have an identity')
+
             ctx = ctx or JSONLDContext()
             
             dct = {'@context': self._rdftype.context,
@@ -176,7 +180,8 @@ def rdfclass(namespace, /, *, _type=None, subclassof=None):
                 value = getattr(self, name)
                 # If the value needs be serialized as jsonld...
                 if isinstance(value, list):
-                    assert predicate.many
+                    if not predicate.many:
+                        raise RuntimeError(f'Lists not allowed for field {name}')
                     value = [dump_and_ref(v) for v in value]
                 else:
                     value = dump_and_ref(value)

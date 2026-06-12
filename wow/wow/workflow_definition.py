@@ -1,7 +1,7 @@
 import json
 from wow.provenance import rdfclass, Namespace, load_jsonld
 
-wf = Namespace('htto://workflowofworkflows.example.com/workflow#', 'wf')
+wf = Namespace('http://workflowofworkflows.example.com/workflow#', 'wf')
 
 @rdfclass(wf)
 class TaskArgument:
