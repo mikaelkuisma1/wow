@@ -17,10 +17,10 @@ def import_target(target: str):
 @rdfclass(wf, subclassof=[prov.Activity])
 class TaskExecution:
     task = wf.executed_task(type_of_value=Task)
-    output = wf.generatedOutput(subpropertyof=prov.generated)
-    start_time = wf.start_time(subpropertyof=prov.startedAtTime)
-    end_time = wf.end_time(subpropertyof=prov.endedAtTime)
-    inputs = wf.inputs(subpropertyof=prov.used, many=True)
+    output = prov.generated()
+    start_time = prov.startedAtTime()
+    end_time = prov.endedAtTime()
+    inputs = prov.used(many=True)
     state = wf.hasTaskState()
 
 @rdfclass(wf, subclassof=[prov.Activity])
