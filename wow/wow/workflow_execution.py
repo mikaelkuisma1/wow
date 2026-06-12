@@ -45,6 +45,7 @@ class Runner:
             kwargs = {argument.argument: tasks_to_outputs(argument.value, outputs) for argument in task.arguments}
             # Store outputs
             outputs[task.identity] = func(**kwargs)
+        print(outputs)
 
 def execute_workflow(jsonfile: str):
     dct = json.loads(Path(jsonfile).read_text())

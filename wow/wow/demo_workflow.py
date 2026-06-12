@@ -47,7 +47,7 @@ def write_workflow_json(filename: str):
     simulation_inputs = SimulationInputs(composition='asd', temperature_K=200)
     task1 = Task.create('mytask1', simulation_node, inputs=simulation_inputs)
     task2 = Task.create('mytask2', experiment_node, sim_result=task1)
-    task3 = Task.create('mytask3', decision_node, experiment=task1, simulation=task2)
+    task3 = Task.create('mytask3', decision_node, sim_result=task1, exp_result=task2)
 
     workflow = Workflow(name='WorkflowOfWorkflowDemo',
                         description="Simple workflow example",
