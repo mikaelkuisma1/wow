@@ -178,6 +178,10 @@ def rdfclass(namespace, /, *, _type=None, subclassof=None):
             
             for name, predicate in self._fields.items():
                 value = getattr(self, name)
+
+                # Pass the context upstream
+                ctx.context.update(predicate.term.context)
+                
                 # If the value needs be serialized as jsonld...
                 if isinstance(value, list):
                     if not predicate.many:
