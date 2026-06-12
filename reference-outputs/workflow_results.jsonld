@@ -1,11 +1,18 @@
 {
     "@context": {
         "wf": "http://workflowofworkflows.example.com/workflow#",
-        "qudt": "http://qudt.org/schema/qudt/",
         "prov": "http://www.w3.org/ns/prov#",
+        "qudt": "http://qudt.org/schema/qudt/",
         "xsd": "http://www.w3.org/2001/XMLSchema#"
     },
     "@graph": [
+        {
+            "@type": "prov:SoftwareAgent",
+            "@id": "wow-demo-software",
+            "wf:software_id": "wow-demo-software",
+            "wf:softwareName": "Minimal Workflow-of-Workflows demonstrator",
+            "wf:softwareVersion": "0.1"
+        },
         {
             "@type": "wf:Task",
             "@id": "mytask1",
@@ -66,8 +73,11 @@
         },
         {
             "@type": "wf:WorkerExecution",
-            "@id": "6338867e-275d-4d97-a363-acc46ef9c5f0",
-            "wf:worker_id": "6338867e-275d-4d97-a363-acc46ef9c5f0",
+            "@id": "7ba0b212-32f8-4596-9052-6fc4c733eb1d",
+            "wf:worker_id": "7ba0b212-32f8-4596-9052-6fc4c733eb1d",
+            "prov:wasAssociatedWith": {
+                "@id": "wow-demo-software"
+            },
             "wf:task_execution": [
                 {
                     "@type": "wf:TaskExecution",
@@ -78,7 +88,7 @@
                         "@type": "wf:SimulationOutput",
                         "wf:predictedVoltage": {
                             "@type": "qudt:QuantityValue",
-                            "qudt:numericValue": 3.461,
+                            "qudt:numericValue": 3.454,
                             "qudt:unit": "http://qudt.org/vocab/unit/V"
                         },
                         "wf:uncertainty": {
@@ -88,11 +98,11 @@
                         }
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:10:10.130683+00:00",
+                        "@value": "2026-06-12T08:37:09.286804+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:10:10.130715+00:00",
+                        "@value": "2026-06-12T08:37:09.286910+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -110,7 +120,8 @@
                             }
                         }
                     ],
-                    "wf:hasTaskState": "done"
+                    "wf:hasTaskState": "done",
+                    "wf:errorMessage": null
                 },
                 {
                     "@type": "wf:TaskExecution",
@@ -122,7 +133,7 @@
                         "wf:experimentStatus": "completed",
                         "wf:measuredVoltage": {
                             "@type": "qudt:QuantityValue",
-                            "qudt:numericValue": 3.388,
+                            "qudt:numericValue": 3.387,
                             "qudt:unit": "http://qudt.org/vocab/unit/V"
                         },
                         "wf:uncertainty": {
@@ -133,11 +144,11 @@
                         "wf:reason": null
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:10:10.130720+00:00",
+                        "@value": "2026-06-12T08:37:09.286915+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:10:10.330912+00:00",
+                        "@value": "2026-06-12T08:37:09.487410+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -149,7 +160,8 @@
                             }
                         }
                     ],
-                    "wf:hasTaskState": "done"
+                    "wf:hasTaskState": "done",
+                    "wf:errorMessage": null
                 },
                 {
                     "@type": "wf:TaskExecution",
@@ -161,11 +173,11 @@
                         "rationale": "model/experiment discrepancy suggests uncertainty"
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:10:10.330940+00:00",
+                        "@value": "2026-06-12T08:37:09.487434+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:10:10.331003+00:00",
+                        "@value": "2026-06-12T08:37:09.487485+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -184,10 +196,11 @@
                             }
                         }
                     ],
-                    "wf:hasTaskState": "done"
+                    "wf:hasTaskState": "done",
+                    "wf:errorMessage": null
                 }
             ]
         }
     ],
-    "@id": "6338867e-275d-4d97-a363-acc46ef9c5f0"
+    "@id": "7ba0b212-32f8-4596-9052-6fc4c733eb1d"
 }

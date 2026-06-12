@@ -24,6 +24,32 @@ We finally create a simple workflow executor at (`wow/workflow_execution.py`) wh
 
 In `scripts/run_workflow.py` we run generate the json (previous section) and also run it by loading it explicitly from jsonld file. The runner is a simple, but focusses on provenance and giving PROV fields where applicable as metadata. The results of the run are again stored as completely serializable/deserialisable jsonld file (`workflow_results.json`). 
 
+## Software metadata (deliverable)
+
+A mock up software agent metadata was generated, and it is later referenced in nodes where applicable.
+
+```
+        {
+            "@type": "prov:SoftwareAgent",
+            "@id": "wow-demo-software",
+            "wf:software_id": "wow-demo-software",
+            "wf:softwareName": "Minimal Workflow-of-Workflows demonstrator",
+            "wf:softwareVersion": "0.1"
+        },
+```
+
+It is defined using the home made rdfclass-framework
+
+```
+@rdfclass(wf, _type=prov.SoftwareAgent)
+class SoftwareAgent:
+    software_id = wf.software_id(identity=True)
+    name = wf.softwareName()
+    version = wf.softwareVersion()
+```
+
+What is missing from this demo is full ttl/owl files to declare relationships of `wf.softwareName` to corresponding prov ones.
+
 ## Units (deliverable)
 
 I focussed to get the units correctly to metadata, so no sanity checking is going on.
@@ -53,7 +79,6 @@ This was initially hard work (and should be consolidated if this structure would
 
 To meet another deliverable, workflow execution, I created `wow/workflow_execution.py`. It also defines its own rdftypes so that the provenance data from the execution can be stored. The dockerfile executes this, and the output can be found at /work/outputs folder.
 
-TODO: Software information
 TODO: Interoperability discussion
 
 ## LLM Use

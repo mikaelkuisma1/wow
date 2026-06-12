@@ -5,6 +5,7 @@ from datetime import datetime, UTC
 import uuid
 import json
 
+from wow import __version__
 from wow.workflow_definition import wf, Task, Namespace
 
 prov = Namespace("http://www.w3.org/ns/prov#", prefix="prov")
@@ -24,10 +25,24 @@ class TaskExecution:
     state = wf.hasTaskState()
     error = wf.errorMessage()
 
+@rdfclass(wf, _type=prov.SoftwareAgent)
+class SoftwareAgent:
+    software_id = wf.software_id(identity=True)
+    name = wf.softwareName()
+    version = wf.softwareVersion()
+
 @rdfclass(wf, subclassof=[prov.Activity])
 class WorkerExecution:
     worker_id = wf.worker_id(identity=True)
+    software = prov.wasAssociatedWith(type_of_value=SoftwareAgent)
     task_executions = wf.task_execution(type_of_value=TaskExecution, many=True)
+
+def create_software_agent():
+    return SoftwareAgent(
+        software_id='wow-demo-software',
+        name='Minimal Workflow-of-Workflows demonstrator',
+        version=__version__,
+    )
 
 def tasks_to_outputs(value, outputs):
     # Replace tasks with their outputs
@@ -91,7 +106,11 @@ class Runner:
                                state=state,
                                error=error) # TODO: ENUM
             executions.append(te)
-        return WorkerExecution(worker_id=worker_id, task_executions=executions)
+        return WorkerExecution(
+            worker_id=worker_id,
+            software=create_software_agent(),
+            task_executions=executions,
+        )
 
 def execute_workflow(jsonfile: str, resultfile: str):
     dct = json.loads(Path(jsonfile).read_text())

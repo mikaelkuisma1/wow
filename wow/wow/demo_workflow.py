@@ -8,6 +8,7 @@ qudt = Namespace('http://qudt.org/schema/qudt/', 'qudt')
 
 KELVIN = 'http://qudt.org/vocab/unit/K'
 VOLT = 'http://qudt.org/vocab/unit/V'
+RANDOM_SEED = 20260612
 
 
 @rdfclass(qudt)
@@ -49,7 +50,8 @@ def simulation_node(inputs: SimulationInputs) -> SimulationOutput:
     
     # Mock deterministic-ish property model
     base = 3.45 if "Li" in composition else 2.5
-    predicted = base - 0.0002 * (temp - 298) + random.uniform(-0.03, 0.03)
+    rng = random.Random(f'{RANDOM_SEED}:simulation:{composition}:{temp}')
+    predicted = base - 0.0002 * (temp - 298) + rng.uniform(-0.03, 0.03)
     return SimulationOutput(predicted_voltage=volt(round(predicted, 3)),
                             uncertainty=volt(0.08))
 
@@ -60,7 +62,10 @@ def experiment_node(sim_result):
     # Mock latency and measurement noise for a remote SDL
     import time
     time.sleep(0.2)
-    measured = sim_result.predicted_voltage.value + random.uniform(-0.12, 0.12)
+    rng = random.Random(
+        f'{RANDOM_SEED}:experiment:{sim_result.predicted_voltage.value}'
+    )
+    measured = sim_result.predicted_voltage.value + rng.uniform(-0.12, 0.12)
     return ExperimentOutput(status="completed",
                             measured_voltage=volt(round(measured, 3)),
                             uncertainty=volt(0.05))
