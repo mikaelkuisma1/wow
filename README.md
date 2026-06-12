@@ -24,11 +24,14 @@ We finally create a simple workflow executor (`wow/workflow_execution.py`) which
 
 In `scripts/run_workflow.py` we generate the JSON-LD workflow description and also execute it by loading it explicitly from the JSON-LD file. The runner is simple, but focuses on provenance and uses PROV fields where applicable. The results of the run are stored as a completely serializable/deserializable JSON-LD file (`workflow_results.jsonld`). 
 
+## Federated nodes (deliverable)
+
 Tasks include `wf:executionLocation` metadata. When this location is present,
-the runner treats the task as a mocked federated task: it writes serialized task
-inputs into a temporary directory named after the location, launches
-`python -m wow.mock_federated_runner` in that directory, polls the subprocess,
-and then reads back the remote `output.jsonld`.
+the runner treats the task as a mocked federated task. To hightlight this, a separate process
+is spawned, and all inputs are serialized to disk. The process is monitored by parent process
+and errors are handled approriately. Outputs are also serialized and exchanged through
+disk. This is because even we are mocking the federated nodes, we want to demonstrate that it is possible
+to do isolated and limited interprocess communication via jsonld serialization. 
 
 ## Software metadata (deliverable)
 
