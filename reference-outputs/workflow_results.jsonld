@@ -11,13 +11,15 @@
             "@id": "wow-demo-software",
             "wf:software_id": "wow-demo-software",
             "wf:softwareName": "Minimal Workflow-of-Workflows demonstrator",
-            "wf:softwareVersion": "0.1"
+            "wf:softwareVersion": "0.1",
+            "wf:containerImage": "python:3.13-slim"
         },
         {
             "@type": "wf:Task",
             "@id": "simulate_voltage",
             "wf:name": "simulate_voltage",
             "wf:task_target": "wow.demo_workflow.simulation_node",
+            "wf:executionLocation": "partner_A_hpc_or_cloud",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
@@ -39,6 +41,7 @@
             "@id": "remote_measurement",
             "wf:name": "remote_measurement",
             "wf:task_target": "wow.demo_workflow.experiment_node",
+            "wf:executionLocation": "partner_B_remote_sdl",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
@@ -54,6 +57,7 @@
             "@id": "choose_next_experiment",
             "wf:name": "choose_next_experiment",
             "wf:task_target": "wow.demo_workflow.decision_node",
+            "wf:executionLocation": "campaign_coordinator",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
@@ -73,8 +77,8 @@
         },
         {
             "@type": "wf:WorkerExecution",
-            "@id": "a8c633e3-3d02-4422-bbe7-8c404896bb5a",
-            "wf:worker_id": "a8c633e3-3d02-4422-bbe7-8c404896bb5a",
+            "@id": "70a921ff-0742-497f-90b8-dfd50aa3997d",
+            "wf:worker_id": "70a921ff-0742-497f-90b8-dfd50aa3997d",
             "prov:wasAssociatedWith": {
                 "@id": "wow-demo-software"
             },
@@ -98,11 +102,11 @@
                         }
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:42:52.820353+00:00",
+                        "@value": "2026-06-12T09:28:12.899657+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:42:52.820474+00:00",
+                        "@value": "2026-06-12T09:28:12.899747+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -144,11 +148,11 @@
                         "wf:reason": null
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:42:52.820482+00:00",
+                        "@value": "2026-06-12T09:28:12.998547+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:42:53.020836+00:00",
+                        "@value": "2026-06-12T09:28:13.199063+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -173,11 +177,11 @@
                         "rationale": "model/experiment discrepancy suggests uncertainty"
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:42:53.020885+00:00",
+                        "@value": "2026-06-12T09:28:13.304031+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:42:53.020970+00:00",
+                        "@value": "2026-06-12T09:28:13.304036+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -202,5 +206,5 @@
             ]
         }
     ],
-    "@id": "a8c633e3-3d02-4422-bbe7-8c404896bb5a"
+    "@id": "70a921ff-0742-497f-90b8-dfd50aa3997d"
 }

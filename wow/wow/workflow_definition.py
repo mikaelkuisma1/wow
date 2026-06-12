@@ -13,14 +13,15 @@ class TaskArgument:
 class Task:
     name = wf.name(identity=True)
     target = wf.task_target()
+    location = wf.executionLocation()
     arguments = wf.task_arguments(type_of_value=TaskArgument, many=True)
 
     @classmethod
-    def create(cls, name, target, **kwargs):
+    def create(cls, name, target, location=None, **kwargs):
         if not isinstance(target, str):
             target = target.__module__ + "." + target.__qualname__
         arguments = [TaskArgument(argument=argument, value=value) for argument, value in kwargs.items()]
-        return cls(name=name, target=target, arguments=arguments)
+        return cls(name=name, target=target, location=location, arguments=arguments)
 
     @property
     def dependencies(self):
@@ -50,4 +51,3 @@ class Workflow:
                 seen.add(task.identity)
 
         return list(visit(self.tasks))
-

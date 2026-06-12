@@ -87,7 +87,7 @@ class JSONLDContext:
         if len(self.graph) > 1:
             return {'@context': self.context,
                     '@graph': list(self.graph.values())}
-        return {'@context': self.context, **self.graph.values()[0]}
+        return {'@context': self.context, **list(self.graph.values())[0]}
 
     def has_id(self, _id):
         return _id in self.graph
@@ -227,7 +227,7 @@ def load_jsonld_type(dct, ctx):
         # key is the curie we used to store this
         # so here is the critical conversion of changing the keys from curies to
         # kwargs going to "dataclass constructor"
-        kwargs[name] = load_jsonld(dct[key], ctx)
+        kwargs[name] = load_jsonld(dct.get(key), ctx)
  
     instance = rdftype(**kwargs)
     

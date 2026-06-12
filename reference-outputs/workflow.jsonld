@@ -9,6 +9,7 @@
             "@id": "simulate_voltage",
             "wf:name": "simulate_voltage",
             "wf:task_target": "wow.demo_workflow.simulation_node",
+            "wf:executionLocation": "partner_A_hpc_or_cloud",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
@@ -30,6 +31,7 @@
             "@id": "remote_measurement",
             "wf:name": "remote_measurement",
             "wf:task_target": "wow.demo_workflow.experiment_node",
+            "wf:executionLocation": "partner_B_remote_sdl",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
@@ -45,6 +47,7 @@
             "@id": "choose_next_experiment",
             "wf:name": "choose_next_experiment",
             "wf:task_target": "wow.demo_workflow.decision_node",
+            "wf:executionLocation": "campaign_coordinator",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",

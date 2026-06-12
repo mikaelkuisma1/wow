@@ -81,10 +81,17 @@ def decision_node(sim_result, exp_result):
 
 def write_workflow_json(filename: str):
     simulation_inputs = SimulationInputs(composition='LiFePO4', temperature=kelvin(300))
-    task1 = Task.create('simulate_voltage', simulation_node, inputs=simulation_inputs)
-    task2 = Task.create('remote_measurement', experiment_node, sim_result=task1)
+    task1 = Task.create('simulate_voltage',
+                        simulation_node,
+                        location='partner_A_hpc_or_cloud',
+                        inputs=simulation_inputs)
+    task2 = Task.create('remote_measurement',
+                        experiment_node,
+                        location='partner_B_remote_sdl',
+                        sim_result=task1)
     task3 = Task.create('choose_next_experiment',
                         decision_node,
+                        location='campaign_coordinator',
                         sim_result=task1,
                         exp_result=task2)
 
