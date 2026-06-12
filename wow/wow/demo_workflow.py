@@ -27,7 +27,7 @@ def simulation_node(inputs: SimulationInputs) -> SimulationOutput:
     return SimulationOutput(predicted_voltage_V=round(predicted, 3), uncertainty_V=0.08)
 
 def experiment_node(sim_result):
-    if sim_result["predicted_voltage_V"] < 3.0:
+    if sim_result.predicted_voltage_V < 3.0:
         return {"status": "skipped", "reason": "prediction below threshold"}
     # Mock latency and measurement noise for a remote SDL
     time.sleep(0.2)
