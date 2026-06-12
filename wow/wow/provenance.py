@@ -100,8 +100,6 @@ def rdfclass(namespace, /, *, _type=None, subclassof=None):
     """Class decorator for dataclass like structure, but for with rdf"""
 
     def wrapper(cls):
-        print('wrapping', cls)
-
         # Iterate over all fields defined in our custom rdfclass
         fields = {}
         identity = None

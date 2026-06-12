@@ -68,7 +68,6 @@ class Runner:
 def execute_workflow(jsonfile: str, resultfile: str):
     dct = json.loads(Path(jsonfile).read_text())
     workflow = load_jsonld(dct)
-    print(workflow)
 
     runner = Runner()
     worker_execution = runner.run(workflow)

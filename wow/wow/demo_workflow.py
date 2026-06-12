@@ -47,7 +47,6 @@ def decision_node(sim_result, exp_result):
     if exp_result.status != "completed":
         return {"recommendation": "explore", "rationale": "experiment unavailable or skipped"}
     delta = abs(sim_result.predicted_voltage_V - exp_result.measured_voltage_V)
-    print("XXX", delta)
     if delta < 0.02:
         return {"recommendation": "exploit", "rationale": "simulation and experiment agree within tolerance"}
     return {"recommendation": "explore", "rationale": "model/experiment discrepancy suggests uncertainty"}
