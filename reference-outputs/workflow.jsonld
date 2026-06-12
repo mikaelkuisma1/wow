@@ -1,0 +1,84 @@
+{
+    "@context": {
+        "wf": "http://workflowofworkflows.example.com/workflow#",
+        "qudt": "http://qudt.org/schema/qudt/"
+    },
+    "@graph": [
+        {
+            "@type": "wf:Task",
+            "@id": "mytask1",
+            "wf:name": "mytask1",
+            "wf:task_target": "wow.demo_workflow.simulation_node",
+            "wf:task_arguments": [
+                {
+                    "@type": "wf:TaskArgument",
+                    "wf:argument_name": "inputs",
+                    "wf:argument_value": {
+                        "@type": "wf:SimulationInputs",
+                        "wf:composition": "LiFePO4",
+                        "wf:temperature": {
+                            "@type": "qudt:QuantityValue",
+                            "qudt:numericValue": 300,
+                            "qudt:unit": "http://qudt.org/vocab/unit/K"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "wf:Task",
+            "@id": "mytask2",
+            "wf:name": "mytask2",
+            "wf:task_target": "wow.demo_workflow.experiment_node",
+            "wf:task_arguments": [
+                {
+                    "@type": "wf:TaskArgument",
+                    "wf:argument_name": "sim_result",
+                    "wf:argument_value": {
+                        "@id": "mytask1"
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "wf:Task",
+            "@id": "mytask3",
+            "wf:name": "mytask3",
+            "wf:task_target": "wow.demo_workflow.decision_node",
+            "wf:task_arguments": [
+                {
+                    "@type": "wf:TaskArgument",
+                    "wf:argument_name": "sim_result",
+                    "wf:argument_value": {
+                        "@id": "mytask1"
+                    }
+                },
+                {
+                    "@type": "wf:TaskArgument",
+                    "wf:argument_name": "exp_result",
+                    "wf:argument_value": {
+                        "@id": "mytask2"
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "wf:Workflow",
+            "@id": "WorkflowOfWorkflowDemo",
+            "wf:name": "WorkflowOfWorkflowDemo",
+            "wf:description": "Simple workflow example",
+            "wf:workflow_tasks": [
+                {
+                    "@id": "mytask1"
+                },
+                {
+                    "@id": "mytask2"
+                },
+                {
+                    "@id": "mytask3"
+                }
+            ]
+        }
+    ],
+    "@id": "WorkflowOfWorkflowDemo"
+}

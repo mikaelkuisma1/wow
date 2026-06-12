@@ -1,0 +1,193 @@
+{
+    "@context": {
+        "wf": "http://workflowofworkflows.example.com/workflow#",
+        "qudt": "http://qudt.org/schema/qudt/",
+        "prov": "http://www.w3.org/ns/prov#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
+    },
+    "@graph": [
+        {
+            "@type": "wf:Task",
+            "@id": "mytask1",
+            "wf:name": "mytask1",
+            "wf:task_target": "wow.demo_workflow.simulation_node",
+            "wf:task_arguments": [
+                {
+                    "@type": "wf:TaskArgument",
+                    "wf:argument_name": "inputs",
+                    "wf:argument_value": {
+                        "@type": "wf:SimulationInputs",
+                        "wf:composition": "LiFePO4",
+                        "wf:temperature": {
+                            "@type": "qudt:QuantityValue",
+                            "qudt:numericValue": 300,
+                            "qudt:unit": "http://qudt.org/vocab/unit/K"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "wf:Task",
+            "@id": "mytask2",
+            "wf:name": "mytask2",
+            "wf:task_target": "wow.demo_workflow.experiment_node",
+            "wf:task_arguments": [
+                {
+                    "@type": "wf:TaskArgument",
+                    "wf:argument_name": "sim_result",
+                    "wf:argument_value": {
+                        "@id": "mytask1"
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "wf:Task",
+            "@id": "mytask3",
+            "wf:name": "mytask3",
+            "wf:task_target": "wow.demo_workflow.decision_node",
+            "wf:task_arguments": [
+                {
+                    "@type": "wf:TaskArgument",
+                    "wf:argument_name": "sim_result",
+                    "wf:argument_value": {
+                        "@id": "mytask1"
+                    }
+                },
+                {
+                    "@type": "wf:TaskArgument",
+                    "wf:argument_name": "exp_result",
+                    "wf:argument_value": {
+                        "@id": "mytask2"
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "wf:WorkerExecution",
+            "@id": "6338867e-275d-4d97-a363-acc46ef9c5f0",
+            "wf:worker_id": "6338867e-275d-4d97-a363-acc46ef9c5f0",
+            "wf:task_execution": [
+                {
+                    "@type": "wf:TaskExecution",
+                    "wf:executed_task": {
+                        "@id": "mytask1"
+                    },
+                    "prov:generated": {
+                        "@type": "wf:SimulationOutput",
+                        "wf:predictedVoltage": {
+                            "@type": "qudt:QuantityValue",
+                            "qudt:numericValue": 3.461,
+                            "qudt:unit": "http://qudt.org/vocab/unit/V"
+                        },
+                        "wf:uncertainty": {
+                            "@type": "qudt:QuantityValue",
+                            "qudt:numericValue": 0.08,
+                            "qudt:unit": "http://qudt.org/vocab/unit/V"
+                        }
+                    },
+                    "prov:startedAtTime": {
+                        "@value": "2026-06-12T08:10:10.130683+00:00",
+                        "@type": "xsd:dateTime"
+                    },
+                    "prov:endedAtTime": {
+                        "@value": "2026-06-12T08:10:10.130715+00:00",
+                        "@type": "xsd:dateTime"
+                    },
+                    "prov:used": [
+                        {
+                            "@type": "wf:TaskArgument",
+                            "wf:argument_name": "inputs",
+                            "wf:argument_value": {
+                                "@type": "wf:SimulationInputs",
+                                "wf:composition": "LiFePO4",
+                                "wf:temperature": {
+                                    "@type": "qudt:QuantityValue",
+                                    "qudt:numericValue": 300,
+                                    "qudt:unit": "http://qudt.org/vocab/unit/K"
+                                }
+                            }
+                        }
+                    ],
+                    "wf:hasTaskState": "done"
+                },
+                {
+                    "@type": "wf:TaskExecution",
+                    "wf:executed_task": {
+                        "@id": "mytask2"
+                    },
+                    "prov:generated": {
+                        "@type": "wf:ExperimentOutput",
+                        "wf:experimentStatus": "completed",
+                        "wf:measuredVoltage": {
+                            "@type": "qudt:QuantityValue",
+                            "qudt:numericValue": 3.388,
+                            "qudt:unit": "http://qudt.org/vocab/unit/V"
+                        },
+                        "wf:uncertainty": {
+                            "@type": "qudt:QuantityValue",
+                            "qudt:numericValue": 0.05,
+                            "qudt:unit": "http://qudt.org/vocab/unit/V"
+                        },
+                        "wf:reason": null
+                    },
+                    "prov:startedAtTime": {
+                        "@value": "2026-06-12T08:10:10.130720+00:00",
+                        "@type": "xsd:dateTime"
+                    },
+                    "prov:endedAtTime": {
+                        "@value": "2026-06-12T08:10:10.330912+00:00",
+                        "@type": "xsd:dateTime"
+                    },
+                    "prov:used": [
+                        {
+                            "@type": "wf:TaskArgument",
+                            "wf:argument_name": "sim_result",
+                            "wf:argument_value": {
+                                "@id": "mytask1"
+                            }
+                        }
+                    ],
+                    "wf:hasTaskState": "done"
+                },
+                {
+                    "@type": "wf:TaskExecution",
+                    "wf:executed_task": {
+                        "@id": "mytask3"
+                    },
+                    "prov:generated": {
+                        "recommendation": "explore",
+                        "rationale": "model/experiment discrepancy suggests uncertainty"
+                    },
+                    "prov:startedAtTime": {
+                        "@value": "2026-06-12T08:10:10.330940+00:00",
+                        "@type": "xsd:dateTime"
+                    },
+                    "prov:endedAtTime": {
+                        "@value": "2026-06-12T08:10:10.331003+00:00",
+                        "@type": "xsd:dateTime"
+                    },
+                    "prov:used": [
+                        {
+                            "@type": "wf:TaskArgument",
+                            "wf:argument_name": "sim_result",
+                            "wf:argument_value": {
+                                "@id": "mytask1"
+                            }
+                        },
+                        {
+                            "@type": "wf:TaskArgument",
+                            "wf:argument_name": "exp_result",
+                            "wf:argument_value": {
+                                "@id": "mytask2"
+                            }
+                        }
+                    ],
+                    "wf:hasTaskState": "done"
+                }
+            ]
+        }
+    ],
+    "@id": "6338867e-275d-4d97-a363-acc46ef9c5f0"
+}
