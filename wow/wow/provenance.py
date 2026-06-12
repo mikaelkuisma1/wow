@@ -38,8 +38,8 @@ class Term:
     def context(self):
         return self.namespace.context
 
-    def __call__(self, type_of_value=None, identity=False, many=False):
-        return Predicate(self, identity=identity, type_of_value=type_of_value, many=many)
+    def __call__(self, type_of_value=None, subpropertyof=None, identity=False, many=False):
+        return Predicate(self, identity=identity, subpropertyof=subpropertyof, type_of_value=type_of_value, many=many)
 
     def __repr__(self):
         return self.curie
@@ -56,6 +56,7 @@ class Predicate:
     identity: bool = False
     type_of_value: Type | None = None
     many: bool = False
+    subpropertyof: Term | None = None
 
 @dataclass(frozen=True)
 class PredicateObjectTuple:
@@ -92,7 +93,7 @@ class JSONLDContext:
     def asstr(self):
         return json.dumps(self.dct)
 
-def rdfclass(namespace, /, *, _type=None):
+def rdfclass(namespace, /, *, _type=None, subclassof=None):
     """Class decorator for dataclass like structure, but for with rdf"""
 
     def wrapper(cls):
@@ -118,7 +119,8 @@ def rdfclass(namespace, /, *, _type=None):
         # Only add new fields after we have pruned users
         cls._fields = fields
         cls._rdftype = namespace(cls.__name__) if _type is None else _type
-        
+        cls._rdfs_subClassOf = subclassof
+
         assert cls._rdftype.curie not in declared_rdf_classes
         declared_rdf_classes[cls._rdftype.curie] = cls 
 
