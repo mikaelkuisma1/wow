@@ -28,8 +28,11 @@ class Runner:
             print(task.identity)
             print(dir(task))
             print(task.target)
+            print(task.arguments)
             func = import_target(task.target)
-            func()
+            kwargs = {argument.argument: argument.value for argument in task.arguments}
+            output = func(**kwargs)
+            print(output)
 
 def execute_workflow(jsonfile: str):
     dct = json.loads(Path(jsonfile).read_text())

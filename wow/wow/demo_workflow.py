@@ -1,6 +1,7 @@
 from wow.provenance import Namespace, rdfclass, load_jsonld
 from wow.workflow_definition import Workflow, Task
 import json
+import random
 
 wow = Namespace('htto://workflowofworkflows.example.com/workflow_of_workflows_demo#', 'wf')
 
@@ -45,7 +46,7 @@ def decision_node(sim_result, exp_result):
 def write_workflow_json(filename: str):
     simulation_inputs = SimulationInputs(composition='asd', temperature_K=200)
     task1 = Task.create('mytask1', simulation_node, inputs=simulation_inputs)
-    task2 = Task.create('mytask2', experiment_node, material='BaTiO3', temperature=128)
+    task2 = Task.create('mytask2', experiment_node, sim_result=task1)
     task3 = Task.create('mytask3', decision_node, experiment=task1, simulation=task2)
 
     workflow = Workflow(name='WorkflowOfWorkflowDemo',
