@@ -1,5 +1,12 @@
 # Minimal Workflow Demonstrator with Taskblaster
 
+## Reproducibility (deliverable)
+
+There is a Dockerfile with associated make file. Do `sudo make build` to build the Docker. Then `sudo make run` to start the docker, and `sudo make shell` to attach and observe its content. The outputs will be at `/work/outputs` folder after `sudo make run` is executed.
+
+For manual use, do `pip install -e wow` to install the python package at `wow/`. Then run the demo with
+`python scripts/run_workflow.py` to produce the `workflow.jsonld` (deliverable) and `workflow_results.jsonld` (deliverable)'.
+
 ## Thought process
 
 Looking at the initial scaffolding, I find it too error prone to work directly with dictionaries (and also I was not that familiar with JSON-LD format). So I made a decision, that in the long run it will be better, if I learn JSON-LD from bottom up with its associated ontologies. Also, working with purely dictionaries is tedious, so I wanted to make the serialization and deserialization to work fully via JSON-LD utilizing modern python standard. This also allowed me to learn what JSON-LD is about as I had to implement many small details and think about the datastructures.
