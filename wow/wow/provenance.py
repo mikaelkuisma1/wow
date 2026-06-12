@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 import json
+from datetime import UTC, datetime
 
 declared_rdf_classes = {}
+declared_jsonld_values = {}
 
 class Namespace:
     def __init__(self, iri: str, prefix: str | None = None):
@@ -215,7 +217,8 @@ def load_jsonld_type(dct, ctx):
     
     # We need to load a type for now
     rdftypename = dct['@type']
-    assert rdftypename in declared_rdf_classes
+    if rdftypename not in declared_rdf_classes:
+        raise RuntimeError(f'Unrecocnized type {rdftypename}')
 
     kwargs = {}
     rdftype = declared_rdf_classes[rdftypename]
@@ -256,7 +259,8 @@ def load_jsonld(dct, ctx=None):
     if isinstance(dct, list):
         return [load_jsonld(item, ctx) for item in dct]
     assert isinstance(dct, dict)
-
+    if '@value' in dct:
+        return load_jsonld_value(dct)
     if '@type' in dct:
         return load_jsonld_type(dct, ctx)
     if '@graph' in dct:
@@ -268,22 +272,40 @@ def load_jsonld(dct, ctx=None):
         # Pure reference
         return ctx.by_id(dct['@id'])
 
-    print(dct)
-    print(type(dct))
-    asd
+    # Just a pure dict
+    # TODO: Iterate over keys
+    return dct
 
+def load_jsonld_value(dct):
+    typename = dct.get('@type')
+    return declared_jsonld_values[typename].from_jsonld_value(dct['@value'])
+
+
+# Manually declare timestamp type
 xsd = Namespace("http://www.w3.org/2001/XMLSchema#", 'xsd')
 
-@dataclass
+def jsonld_value(cls):
+    declared_jsonld_values[cls._rdftype.curie] = cls
+    return cls
+
+@jsonld_value
 class dateTime:
-    time: float
+    _rdftype = xsd.dateTime
+
+    def __init__(self, timestamp):
+        self.timestamp = timestamp
 
     def to_jsonld(self, ctx):
-        ctx.context[xsd.prefix] = xsd.iri
-        from datetime import datetime, UTC
-        timestamp = datetime.fromtimestamp(self.time, UTC).isoformat()
+        ctx.context.update(self._rdftype.context)
+
+        timestamp = datetime.fromtimestamp(self.timestamp, UTC).isoformat()
         return {"@value": timestamp,
-                "@type": "xsd:dateTime"}
+                "@type": self._rdftype.curie}
+
+    @classmethod
+    def from_jsonld_value(cls, value):
+        return cls(datetime.fromisoformat(value).timestamp())
+
 
 def time():
     import time
