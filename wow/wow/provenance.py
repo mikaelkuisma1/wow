@@ -116,6 +116,12 @@ def rdfclass(namespace, /, *, _type=None):
 
         cls._identity = identity
 
+        # Create a property calleod identity
+        def identity_property(self):
+            return getattr(self, self._identity)
+
+        cls.identity = property(identity_property)
+
         def __repr__(self):
             field_strs = []
             dct = {name: getattr(self, name) for name in self._fields}
@@ -162,7 +168,6 @@ def rdfclass(namespace, /, *, _type=None):
                 else:
                     value = dump_and_ref(value)
 
-                print('Value should be serializable now', value)
                 dct.update({predicate.term.curie: value})
             
             if '@id' in dct:
@@ -170,7 +175,11 @@ def rdfclass(namespace, /, *, _type=None):
 
             # Return the entire graph only at the final call
             if ctx_was_none:
-                return ctx.dct
+                # ctx_was_none indicates user is calling us to serialize
+                # we need to have root @id node of us
+                dct = ctx.dct
+                dct['@id'] = self.identity
+                return dct
             return dct
 
         cls.to_jsonld = to_jsonld
@@ -179,7 +188,7 @@ def rdfclass(namespace, /, *, _type=None):
 
     return wrapper
 
-def load_jsonld_type(dct):
+def load_jsonld_type(dct, ctx):
     context = dct.pop('@context', {})
     
     # We need to load a type for now
@@ -194,20 +203,51 @@ def load_jsonld_type(dct):
         # key is the curie we used to store this
         # so here is the critical conversion of changing the keys from curies to
         # kwargs going to "dataclass constructor"
-        kwargs[name] = load_jsonld(dct[key])
-  
-    return rdftype(**kwargs)
+        kwargs[name] = load_jsonld(dct[key], ctx)
+ 
+    instance = rdftype(**kwargs)
+    
+    if '@id' in dct:
+        ctx.add(instance)
 
-def load_jsonld(dct):
+    return instance
+
+class LoadJSONLDContext:
+    def __init__(self):
+        self.ids = {}
+
+    def add(self, obj):
+        self.ids[obj.identity] = obj
+
+    def by_id(self, _id):
+        return self.ids[_id]
+
+def load_jsonld(dct, ctx=None):
+    ctx = ctx or LoadJSONLDContext()
+
+    # This is not a full jsonld parser for arbitrary triples
+    # however, it will work for the requirements of this demo
     if isinstance(dct, (str, int, float)):
         return dct
     if isinstance(dct, list):
-        return [load_jsonld(item) for item in dct]
+        return [load_jsonld(item, ctx) for item in dct]
     assert isinstance(dct, dict)
 
     if '@type' in dct:
-        return load_jsonld_type(dct)
+        return load_jsonld_type(dct, ctx)
+    if '@graph' in dct:
+        graph = dct['@graph']
+        types = [load_jsonld_type(item, ctx) for item in graph]
+        print('Our dct has graph and looks like', dct)
+        return ctx.by_id(dct['@id'])
+
+    if '@id' in dct:
+        # Pure reference
+        print('Pure reference', dct)
+        return ctx.by_id(dct['@id'])
+
     print(dct)
+    print(type(dct))
     asd
 
 if __name__ == '__main__':
@@ -216,18 +256,6 @@ if __name__ == '__main__':
     print(wf.task)
     print(wf.dependsOn(wf.task))
     print(type(wf.dependsOn(wf.task)))
-
-    # No type, implies the type is taken from class name
-    @rdfclass(wf)
-    class Workflow:
-        name = wf.name(identity=True)
-        description = wf.description()
-
-    print(Workflow)
-    workflow = Workflow(name='WorkflowOfWorkflowDemo',
-                        description="Simple workflow example")
-    print(workflow)
-    print(workflow.to_jsonld())
 
     @rdfclass(wf)
     class TaskArgument:
@@ -246,9 +274,31 @@ if __name__ == '__main__':
             return cls(name=name, target=target, arguments=arguments)
 
     task = Task.create('mytask', 'run_experiment', material='BaTiO3', temperature=128)
+
     print(task)
     s = json.dumps(task.to_jsonld())
     dct = json.loads(s)
+    assert '@id' in dct
     ltask = load_jsonld(dct)
     print(type(ltask.arguments[0]))
+    
+    # No type, implies the type is taken from class name
+    @rdfclass(wf)
+    class Workflow:
+        name = wf.name(identity=True)
+        description = wf.description()
+        tasks = wf.workflow_tasks(type_of_value=Task, many=True)
+    print(Workflow)
+    workflow = Workflow(name='WorkflowOfWorkflowDemo',
+                        description="Simple workflow example",
+                        tasks=[task])
+    print(workflow)
+    print(workflow.to_jsonld())
 
+    s = json.dumps(workflow.to_jsonld())
+    dct = json.loads(s)
+    print('Deserializing', dct)
+    lworkflow = load_jsonld(dct)
+    print(lworkflow)
+    s2 = json.dumps(lworkflow.to_jsonld())
+    assert s == s2  # Reserialization of loaded should be the same
