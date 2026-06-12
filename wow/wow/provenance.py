@@ -69,19 +69,24 @@ class PredicateObjectTuple:
 class JSONLDContext:
     def __init__(self):
         self.context = {} 
-        self.graph = []
+        self.graph = {}
 
     def add(self, dct):
         assert '@id' in dct
+        if dct['@id'] in self.graph:
+            return
         self.context.update(dct.pop('@context', {}))
-        self.graph.append(dct)
+        self.graph[dct['@id']] = dct
 
     @property
     def dct(self):
         if len(self.graph) > 1:
             return {'@context': self.context,
-                    '@graph': self.graph}
-        return {'@context': self.context, **self.graph[0]}
+                    '@graph': list(self.graph.values())}
+        return {'@context': self.context, **self.graph.values()[0]}
+
+    def has_id(self, _id):
+        return _id in self.graph
 
     @property
     def asstr(self):
@@ -146,7 +151,10 @@ def rdfclass(namespace, /, *, _type=None):
             dct = {'@context': self._rdftype.context,
                    '@type': self._rdftype.curie}
             if self._identity is not None:
-                dct.update({'@id': getattr(self, self._identity)})
+                dct.update({'@id': self.identity})
+                if ctx.has_id(self.identity):
+                    # Staright up return the reference
+                    return dct
             
             def dump_and_ref(value):
                 if hasattr(value, 'to_jsonld'):
