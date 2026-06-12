@@ -4,7 +4,7 @@ from pathlib import Path
 
 class Runner:
     def run(self, workflow):
-        print(workflow.tasks)
+        print(workflow.topological_order)
 
 def execute_workflow(jsonfile: str):
     dct = json.loads(Path(jsonfile).read_text())

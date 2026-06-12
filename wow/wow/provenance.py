@@ -106,6 +106,9 @@ def rdfclass(namespace, /, *, _type=None):
                 continue
             if isinstance(value, classmethod):
                 continue
+            if isinstance(value, property):
+                continue
+
             assert isinstance(value, Predicate), (name, type(value))
             if value.identity:
                 assert identity is None
