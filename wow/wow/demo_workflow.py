@@ -21,6 +21,7 @@ class ExperimentOutput:
     status = wow.experimentStatus()
     measured_voltage_V = wow.measuredVoltage()
     uncertainty_V = wow.uncertainty_V()
+    reason = wow.reason()
 
 
 def simulation_node(inputs: SimulationInputs) -> SimulationOutput:
@@ -72,4 +73,3 @@ def write_workflow_json(filename: str):
 
 if __name__ == "__main__":
     create_workflow_json()
-

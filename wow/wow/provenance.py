@@ -142,11 +142,11 @@ def rdfclass(namespace, /, *, _type=None, subclassof=None):
 
         # Create a custom init, only allow kwargs
         def __init__(self, **kwargs):
-            assert self._fields.keys() == kwargs.keys(), (
-                self._fields.keys(),
-                kwargs.keys(),
-            )
-            self.__dict__.update(kwargs)
+            unknown_fields = kwargs.keys() - self._fields.keys()
+            assert not unknown_fields, (self._fields.keys(), kwargs.keys())
+            values = {name: None for name in self._fields}
+            values.update(kwargs)
+            self.__dict__.update(values)
 
         cls.__init__ = __init__
 
