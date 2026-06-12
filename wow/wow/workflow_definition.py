@@ -72,7 +72,7 @@ def decision_node(sim_result, exp_result):
     return {"recommendation": "explore", "rationale": "model/experiment discrepancy suggests uncertainty"}
 """
 
-def create_workflow_json():
+def write_workflow_json(filename: str):
     simulation_inputs = SimulationInputs(composition='asd', temperature_K=200)
     task1 = Task.create('mytask1', simulation_node, inputs=simulation_inputs)
     #task2 = Task.create('mytask2', experiment_node, material='BaTiO3', temperature=128)
@@ -84,7 +84,7 @@ def create_workflow_json():
 
     s = json.dumps(workflow.to_jsonld(), indent=4)
     from pathlib import Path
-    Path('workflow.json').write_text(s)
+    Path(filename).write_text(s)
     
     dct = json.loads(s)
     lworkflow = load_jsonld(dct)
