@@ -1,4 +1,4 @@
-# Minimal Workflow Demonstrator with Taskblaster
+# Minimal Workflow Demonstrator with Full Provenance
 
 ## Reproducibility (deliverable)
 
@@ -6,6 +6,36 @@ There is a Dockerfile with associated make file. Do `sudo make build` to build t
 
 For manual use, do `pip install -e wow` to install the python package at `wow/`. Then run the demo with
 `python scripts/run_workflow.py` to produce the `workflow.jsonld` (deliverable) and `workflow_results.jsonld` (deliverable)'.
+
+## Introduction
+
+The `wow/provenance.py` provides Pythonic dataclass like wrappers to allow jsonld metadata output. It was the hardest part of this assignment, but it was necessary as explicitly writing jsonld without formal machinery is tedious and error prone.
+
+Using that we can easily make a workflow definition datastructures (`wow/workflow_definition.py`),
+and define our workflow (`wow/demo_workflow.py`).
+
+We finally create a simple workflow executor at (`wow/workflow_execution.py`) which also utilizes the rdf framework created. It is just a mockup of a workflow engine, as implementing full workflow-engine is out of scope for this assignment.
+
+## The workflow jsonld (deliverable)
+
+`wow/workflow_definition.py` defines basic datastructures, so we can serialize and deserialize the workflows. The assignment asked for json of the workflow. In this case, since we can serialize and deserialized the workflow definition, we actually use Python to create the workflow object, which is then turned into json.
+
+## Executing the workflow jsonld and provenance metadate (deliverable)
+
+In `scripts/run_workflow.py` we run generate the json (previous section) and also run it by loading it explicitly from jsonld file. The runner is a simple, but focusses on provenance and giving PROV fields where applicable as metadata. The results of the run are again stored as completely serializable/deserialisable jsonld file (`workflow_results.json`). 
+
+## Units (deliverable)
+
+I focussed to get the units correctly to metadata, so no sanity checking is going on.
+Units are represented explicitly via qudt namespace.
+
+```
+                        "wf:measuredVoltage": {
+                            "@type": "qudt:QuantityValue",
+                            "qudt:numericValue": 3.36,
+                            "qudt:unit": "http://qudt.org/vocab/unit/V"
+                        },
+```
 
 ## Thought process
 
@@ -18,10 +48,8 @@ This was initially hard work (and should be consolidated if this structure would
 To meet another deliverable, workflow execution, I created `wow/workflow_execution.py`. It also defines its own rdftypes so that the provenance data from the execution can be stored. The dockerfile executes this, and the output can be found at /work/outputs folder.
 
 TODO: Software information
-TODO: Units
 TODO: Interoperability discussion
 TODO: Failure handling
-TODO: Reproducibility
 
 ## LLM Use
 

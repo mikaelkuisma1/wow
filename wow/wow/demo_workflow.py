@@ -3,57 +3,79 @@ from wow.workflow_definition import Workflow, Task
 import json
 import random
 
-wow = Namespace('htto://workflowofworkflows.example.com/workflow_of_workflows_demo#', 'wf')
+wow = Namespace('http://workflowofworkflows.example.com/workflow_of_workflows_demo#', 'wf')
+qudt = Namespace('http://qudt.org/schema/qudt/', 'qudt')
+
+KELVIN = 'http://qudt.org/vocab/unit/K'
+VOLT = 'http://qudt.org/vocab/unit/V'
+
+
+@rdfclass(qudt)
+class QuantityValue:
+    value = qudt.numericValue()
+    unit = qudt.unit()
+
+
+def kelvin(value):
+    return QuantityValue(value=value, unit=KELVIN)
+
+
+def volt(value):
+    return QuantityValue(value=value, unit=VOLT)
+
 
 @rdfclass(wow)
 class SimulationInputs:
     composition = wow.composition()
-    temperature_K = wow.temperature_K()
+    temperature = wow.temperature(type_of_value=QuantityValue)
 
 
 @rdfclass(wow)
 class SimulationOutput:
-    predicted_voltage_V = wow.predicted_voltage_V()
-    uncertainty_V = wow.uncertainty_V()
+    predicted_voltage = wow.predictedVoltage(type_of_value=QuantityValue)
+    uncertainty = wow.uncertainty(type_of_value=QuantityValue)
 
 @rdfclass(wow)
 class ExperimentOutput:
     status = wow.experimentStatus()
-    measured_voltage_V = wow.measuredVoltage()
-    uncertainty_V = wow.uncertainty_V()
+    measured_voltage = wow.measuredVoltage(type_of_value=QuantityValue)
+    uncertainty = wow.uncertainty(type_of_value=QuantityValue)
     reason = wow.reason()
 
 
 def simulation_node(inputs: SimulationInputs) -> SimulationOutput:
     composition = inputs.composition
-    temp = inputs.temperature_K
+    temp = inputs.temperature.value
     
     # Mock deterministic-ish property model
     base = 3.45 if "Li" in composition else 2.5
     predicted = base - 0.0002 * (temp - 298) + random.uniform(-0.03, 0.03)
-    return SimulationOutput(predicted_voltage_V=round(predicted, 3), uncertainty_V=0.08)
+    return SimulationOutput(predicted_voltage=volt(round(predicted, 3)),
+                            uncertainty=volt(0.08))
 
 def experiment_node(sim_result):
-    if sim_result.predicted_voltage_V < 3.0:
+    if sim_result.predicted_voltage.value < 3.0:
         return ExperimentOutput(status="skipped", reason="prediction below threshold")
 
     # Mock latency and measurement noise for a remote SDL
     import time
     time.sleep(0.2)
-    measured = sim_result.predicted_voltage_V + random.uniform(-0.12, 0.12)
-    return ExperimentOutput(status="completed", measured_voltage_V= round(measured, 3), uncertainty_V= 0.05)
+    measured = sim_result.predicted_voltage.value + random.uniform(-0.12, 0.12)
+    return ExperimentOutput(status="completed",
+                            measured_voltage=volt(round(measured, 3)),
+                            uncertainty=volt(0.05))
 
 
 def decision_node(sim_result, exp_result):
     if exp_result.status != "completed":
         return {"recommendation": "explore", "rationale": "experiment unavailable or skipped"}
-    delta = abs(sim_result.predicted_voltage_V - exp_result.measured_voltage_V)
+    delta = abs(sim_result.predicted_voltage.value - exp_result.measured_voltage.value)
     if delta < 0.02:
         return {"recommendation": "exploit", "rationale": "simulation and experiment agree within tolerance"}
     return {"recommendation": "explore", "rationale": "model/experiment discrepancy suggests uncertainty"}
 
 def write_workflow_json(filename: str):
-    simulation_inputs = SimulationInputs(composition='LiFePO4', temperature_K=300)
+    simulation_inputs = SimulationInputs(composition='LiFePO4', temperature=kelvin(300))
     task1 = Task.create('mytask1', simulation_node, inputs=simulation_inputs)
     task2 = Task.create('mytask2', experiment_node, sim_result=task1)
     task3 = Task.create('mytask3', decision_node, sim_result=task1, exp_result=task2)
