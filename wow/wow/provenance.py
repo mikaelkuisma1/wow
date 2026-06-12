@@ -156,7 +156,7 @@ def rdfclass(namespace, /, *, _type=None):
                         value = {'@id': value['@id']}
                     else:
                         # Omit context as we are dumping directly
-                        value = {k:v for k, v in value.items() if k is not '@context'}
+                        value = {k:v for k, v in value.items() if k != '@context'}
                 return value
             
             for name, predicate in self._fields.items():
@@ -189,7 +189,7 @@ def rdfclass(namespace, /, *, _type=None):
     return wrapper
 
 def load_jsonld_type(dct, ctx):
-    context = dct.pop('@context', {})
+    context = dct.get('@context', {})
     
     # We need to load a type for now
     rdftypename = dct['@type']
@@ -227,7 +227,9 @@ def load_jsonld(dct, ctx=None):
 
     # This is not a full jsonld parser for arbitrary triples
     # however, it will work for the requirements of this demo
-    if isinstance(dct, (str, int, float)):
+    if dct is None:
+        return dct
+    if isinstance(dct, (str, int, float, bool)):
         return dct
     if isinstance(dct, list):
         return [load_jsonld(item, ctx) for item in dct]
