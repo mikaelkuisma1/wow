@@ -53,6 +53,9 @@ def tasks_to_outputs(value, outputs):
     return value
 
 class Runner:
+    def log(self, message):
+        print(message, flush=True)
+
     @property
     def time():
         t = time.time()
@@ -60,10 +63,13 @@ class Runner:
 
     def run(self, workflow):
         worker_id = str(uuid.uuid4())
+        tasks = workflow.topological_order
+        self.log(f'Running workflow {workflow.name} with {len(tasks)} tasks')
         # Temporarily store outputs of tasks here
         outputs = {}
         executions = []
-        for task in workflow.topological_order:
+        for task in tasks:
+            self.log(f'Fetching task {task.name}')
             start_time = time()
             if any(execution.state != 'done' for execution in executions):
                 end_time = time()
@@ -77,6 +83,7 @@ class Runner:
                     error='previous task did not complete successfully',
                 )
                 executions.append(te)
+                self.log(f'Task {task.name} cancelled: {te.error}')
                 continue
 
             func = import_target(task.target)
@@ -85,17 +92,20 @@ class Runner:
                 for argument in task.arguments
             }
 
+            self.log(f'Starting task {task.name}')
             try:
                 output = func(**kwargs)
             except Exception as err:
                 output = None
                 state = 'failed'
                 error = f'{err.__class__.__name__}: {err}'
+                self.log(f'Task {task.name} failed: {error}')
             else:
                 # Store outputs only for successfully completed tasks.
                 outputs[task.identity] = output
                 state = 'done'
                 error = None
+                self.log(f'Task {task.name} done')
             end_time = time()
 
             te = TaskExecution(task=task,
@@ -119,3 +129,4 @@ def execute_workflow(jsonfile: str, resultfile: str):
     runner = Runner()
     worker_execution = runner.run(workflow)
     Path(resultfile).write_text(json.dumps(worker_execution.to_jsonld(), indent=4))
+    print(f'Wrote workflow results to {resultfile}', flush=True)

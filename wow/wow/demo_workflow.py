@@ -81,9 +81,12 @@ def decision_node(sim_result, exp_result):
 
 def write_workflow_json(filename: str):
     simulation_inputs = SimulationInputs(composition='LiFePO4', temperature=kelvin(300))
-    task1 = Task.create('mytask1', simulation_node, inputs=simulation_inputs)
-    task2 = Task.create('mytask2', experiment_node, sim_result=task1)
-    task3 = Task.create('mytask3', decision_node, sim_result=task1, exp_result=task2)
+    task1 = Task.create('simulate_voltage', simulation_node, inputs=simulation_inputs)
+    task2 = Task.create('remote_measurement', experiment_node, sim_result=task1)
+    task3 = Task.create('choose_next_experiment',
+                        decision_node,
+                        sim_result=task1,
+                        exp_result=task2)
 
     workflow = Workflow(name='WorkflowOfWorkflowDemo',
                         description="Simple workflow example",
@@ -92,6 +95,7 @@ def write_workflow_json(filename: str):
     s = json.dumps(workflow.to_jsonld(), indent=4)
     from pathlib import Path
     Path(filename).write_text(s)
+    print(f'Wrote workflow description to {filename}', flush=True)
     
     dct = json.loads(s)
     lworkflow = load_jsonld(dct)

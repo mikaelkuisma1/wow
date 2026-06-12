@@ -6,8 +6,8 @@
     "@graph": [
         {
             "@type": "wf:Task",
-            "@id": "mytask1",
-            "wf:name": "mytask1",
+            "@id": "simulate_voltage",
+            "wf:name": "simulate_voltage",
             "wf:task_target": "wow.demo_workflow.simulation_node",
             "wf:task_arguments": [
                 {
@@ -27,37 +27,37 @@
         },
         {
             "@type": "wf:Task",
-            "@id": "mytask2",
-            "wf:name": "mytask2",
+            "@id": "remote_measurement",
+            "wf:name": "remote_measurement",
             "wf:task_target": "wow.demo_workflow.experiment_node",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
                     "wf:argument_name": "sim_result",
                     "wf:argument_value": {
-                        "@id": "mytask1"
+                        "@id": "simulate_voltage"
                     }
                 }
             ]
         },
         {
             "@type": "wf:Task",
-            "@id": "mytask3",
-            "wf:name": "mytask3",
+            "@id": "choose_next_experiment",
+            "wf:name": "choose_next_experiment",
             "wf:task_target": "wow.demo_workflow.decision_node",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
                     "wf:argument_name": "sim_result",
                     "wf:argument_value": {
-                        "@id": "mytask1"
+                        "@id": "simulate_voltage"
                     }
                 },
                 {
                     "@type": "wf:TaskArgument",
                     "wf:argument_name": "exp_result",
                     "wf:argument_value": {
-                        "@id": "mytask2"
+                        "@id": "remote_measurement"
                     }
                 }
             ]
@@ -69,13 +69,13 @@
             "wf:description": "Simple workflow example",
             "wf:workflow_tasks": [
                 {
-                    "@id": "mytask1"
+                    "@id": "simulate_voltage"
                 },
                 {
-                    "@id": "mytask2"
+                    "@id": "remote_measurement"
                 },
                 {
-                    "@id": "mytask3"
+                    "@id": "choose_next_experiment"
                 }
             ]
         }

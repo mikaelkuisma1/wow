@@ -15,8 +15,8 @@
         },
         {
             "@type": "wf:Task",
-            "@id": "mytask1",
-            "wf:name": "mytask1",
+            "@id": "simulate_voltage",
+            "wf:name": "simulate_voltage",
             "wf:task_target": "wow.demo_workflow.simulation_node",
             "wf:task_arguments": [
                 {
@@ -36,45 +36,45 @@
         },
         {
             "@type": "wf:Task",
-            "@id": "mytask2",
-            "wf:name": "mytask2",
+            "@id": "remote_measurement",
+            "wf:name": "remote_measurement",
             "wf:task_target": "wow.demo_workflow.experiment_node",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
                     "wf:argument_name": "sim_result",
                     "wf:argument_value": {
-                        "@id": "mytask1"
+                        "@id": "simulate_voltage"
                     }
                 }
             ]
         },
         {
             "@type": "wf:Task",
-            "@id": "mytask3",
-            "wf:name": "mytask3",
+            "@id": "choose_next_experiment",
+            "wf:name": "choose_next_experiment",
             "wf:task_target": "wow.demo_workflow.decision_node",
             "wf:task_arguments": [
                 {
                     "@type": "wf:TaskArgument",
                     "wf:argument_name": "sim_result",
                     "wf:argument_value": {
-                        "@id": "mytask1"
+                        "@id": "simulate_voltage"
                     }
                 },
                 {
                     "@type": "wf:TaskArgument",
                     "wf:argument_name": "exp_result",
                     "wf:argument_value": {
-                        "@id": "mytask2"
+                        "@id": "remote_measurement"
                     }
                 }
             ]
         },
         {
             "@type": "wf:WorkerExecution",
-            "@id": "7ba0b212-32f8-4596-9052-6fc4c733eb1d",
-            "wf:worker_id": "7ba0b212-32f8-4596-9052-6fc4c733eb1d",
+            "@id": "a8c633e3-3d02-4422-bbe7-8c404896bb5a",
+            "wf:worker_id": "a8c633e3-3d02-4422-bbe7-8c404896bb5a",
             "prov:wasAssociatedWith": {
                 "@id": "wow-demo-software"
             },
@@ -82,7 +82,7 @@
                 {
                     "@type": "wf:TaskExecution",
                     "wf:executed_task": {
-                        "@id": "mytask1"
+                        "@id": "simulate_voltage"
                     },
                     "prov:generated": {
                         "@type": "wf:SimulationOutput",
@@ -98,11 +98,11 @@
                         }
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:37:09.286804+00:00",
+                        "@value": "2026-06-12T08:42:52.820353+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:37:09.286910+00:00",
+                        "@value": "2026-06-12T08:42:52.820474+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -126,7 +126,7 @@
                 {
                     "@type": "wf:TaskExecution",
                     "wf:executed_task": {
-                        "@id": "mytask2"
+                        "@id": "remote_measurement"
                     },
                     "prov:generated": {
                         "@type": "wf:ExperimentOutput",
@@ -144,11 +144,11 @@
                         "wf:reason": null
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:37:09.286915+00:00",
+                        "@value": "2026-06-12T08:42:52.820482+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:37:09.487410+00:00",
+                        "@value": "2026-06-12T08:42:53.020836+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -156,7 +156,7 @@
                             "@type": "wf:TaskArgument",
                             "wf:argument_name": "sim_result",
                             "wf:argument_value": {
-                                "@id": "mytask1"
+                                "@id": "simulate_voltage"
                             }
                         }
                     ],
@@ -166,18 +166,18 @@
                 {
                     "@type": "wf:TaskExecution",
                     "wf:executed_task": {
-                        "@id": "mytask3"
+                        "@id": "choose_next_experiment"
                     },
                     "prov:generated": {
                         "recommendation": "explore",
                         "rationale": "model/experiment discrepancy suggests uncertainty"
                     },
                     "prov:startedAtTime": {
-                        "@value": "2026-06-12T08:37:09.487434+00:00",
+                        "@value": "2026-06-12T08:42:53.020885+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:endedAtTime": {
-                        "@value": "2026-06-12T08:37:09.487485+00:00",
+                        "@value": "2026-06-12T08:42:53.020970+00:00",
                         "@type": "xsd:dateTime"
                     },
                     "prov:used": [
@@ -185,14 +185,14 @@
                             "@type": "wf:TaskArgument",
                             "wf:argument_name": "sim_result",
                             "wf:argument_value": {
-                                "@id": "mytask1"
+                                "@id": "simulate_voltage"
                             }
                         },
                         {
                             "@type": "wf:TaskArgument",
                             "wf:argument_name": "exp_result",
                             "wf:argument_value": {
-                                "@id": "mytask2"
+                                "@id": "remote_measurement"
                             }
                         }
                     ],
@@ -202,5 +202,5 @@
             ]
         }
     ],
-    "@id": "7ba0b212-32f8-4596-9052-6fc4c733eb1d"
+    "@id": "a8c633e3-3d02-4422-bbe7-8c404896bb5a"
 }

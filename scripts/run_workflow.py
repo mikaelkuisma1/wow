@@ -15,3 +15,4 @@ write_workflow_json('workflow.jsonld')
 execute_workflow('workflow.jsonld', 'workflow_results.jsonld')
 
 consistency_check('workflow_results.jsonld')
+print('Validated workflow_results.jsonld', flush=True)
