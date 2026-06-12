@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import json
 from datetime import UTC, datetime
+from typing import Type
 
 declared_rdf_classes = {}
 declared_jsonld_values = {}

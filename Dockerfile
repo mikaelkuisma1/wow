@@ -14,8 +14,7 @@ RUN pip install -r requirements.txt
 FROM base AS wow
 
 COPY wow /work/wow
+COPY scripts /work/scripts
 RUN pip install /work/wow 
 
-RUN mkdir wow-repo && cd wow-repo && tb init wow
-
-RUN cd wow-repo && tb workflow -m wow.workflow
+RUN mkdir outputs && cd outputs && python ../scripts/run_workflow.py
